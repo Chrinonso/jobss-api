@@ -38,6 +38,8 @@ UserSchema.methods.createJWT = function () {
     return jwt.sign({ userId: this._id, name: this.name }, process.env.JWT_SECRET, {expiresIn: process.env.JWT_LIFETIME,})
 }
 
+// an instance or function that compares the password provided to the one on the database
+
 UserSchema.methods.comparePassword = async function (candidatePassword) {
 const isMatch = bcrypt.compare(candidatePassword, this.password)
 return isMatch;
