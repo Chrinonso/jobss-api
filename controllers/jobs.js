@@ -25,6 +25,8 @@ const getAllJobs = async (req, res) => {
 
 
 // another way to write the code above
+// code allows a user to get a particular job linked to an ID
+
 const getJob = async (req, res) => {
 
     const jobId = req.params.id;
@@ -41,6 +43,8 @@ const getJob = async (req, res) => {
 }
 
 const createJob = async (req, res) => {
+    // we created a new 'createdBy' property because its on our Schema Model.
+
     req.body.createdBy = req.user.userId
     // console.log(req.body.createdBy)
     const job = await Job.create(req.body)
@@ -49,12 +53,34 @@ const createJob = async (req, res) => {
 
 
 const updateJob = async (req, res) => {
-    res.send('update job')
+    const jobId = req.params.id;
+    const userId = req.user.UserId;
+    const { company, position } = req.body;
+
+    if(company === '' || position === '') {
+        throw new BadRequestError('fields cannot be empty')
+    }
+    const job = await Job.findByIdAndUpdate({_id:jobId, createdBy:userId}, req.body, {new:true, runValidators:true})
+
+    if(!job) {
+        throw new BadRequestError(`No Job with the ID ${jobId}`)
+    }
+
+    res.status(StatusCodes.OK).json({ job })
 }
 
 
 const deleteJob = async (req, res) => {
-    res.send('delete job')
+    const jobId = req.params.id;
+    const userId = req.user.UserId;
+
+    const job = await Job.findByIdAndDelete({_id:jobId, createdBy:userId})
+
+    if(!job) {
+        throw new BadRequestError(`No Job with the ID ${jobId}`)
+
+    }
+    res.status(StatusCodes.OK).json({job, msg: 'Job Deleted' })
 }
 
 module.exports = {
